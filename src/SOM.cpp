@@ -14,17 +14,20 @@ bool tmp = true;
 bool is_som_finished = false;
 const int map_width = 10;
 const int map_height = 10;
-const int max_iter = 50000;
+const int max_iter = 20000;
 int iter = 0;
-double factor = 0.3;
-double scale = 5;
+double learning_rate = 0.1;
+double radius = 5;
+double n_learning_rate = 0.1;
+double neighbor = 5;
 
 glm::fvec2 **createMap(int map_width, int map_height);
 glm::fvec2 **createInputDataset(int width, int height);
 const glm::fvec2 getInput(glm::fvec2 **dataset, int map_width, int map_height);
 void destroy(glm::fvec2 **arr, int width, int height);
-void updateNode(glm::fvec2** lattice, glm::fvec2 nowInput,glm::ivec2 bmuId, glm::ivec2 nodeId, double scale, double factor);
-double compute(int iter, double fun);
+void updateNode(glm::fvec2** lattice, glm::fvec2 nowInput,glm::ivec2 bmuId, glm::ivec2 nodeId, double radius, double learning_rate);
+double computerate(int iter, double fun);
+double computeradius(int iter, double fun);
 double computeScale(double sigma, double dist);
 bool isInNeighborhood(double squaredDist, double radius);
 
@@ -43,8 +46,8 @@ void SOM_IterateOnce()
     // 1. Get one input from the dataset
     // 2. Find BMU
     // 3. Update BMU and the neighbors
-    double n_factor = compute(iter, factor);
-    double neighbor = compute(iter, scale);
+    n_learning_rate = computerate(iter, learning_rate);
+    neighbor = computeradius(iter, radius);
 
     const glm::fvec2 nowInput = getInput(dataset, map_width, map_height);
     double minDist = -1.0;
@@ -88,8 +91,8 @@ void SOM_IterateOnce()
             // std::cout << i<<", " << j << std::endl;
             if (isInNeighborhood(squaredDist, neighbor))
             {
-                double n_scale = computeScale(neighbor, squaredDist);
-                updateNode(lattice, nowInput, bmu, node, n_scale, n_factor);
+                double n_radius = computeScale(neighbor, squaredDist);
+                updateNode(lattice, nowInput, bmu, node, n_radius, n_learning_rate);
                 
             }
         }
@@ -155,10 +158,15 @@ void destroy(glm::fvec2 **arr, int width, int height)
     }
 }
 
-double compute(int iter, double fun)
+double computeradius(int iter, double fun)
 {
     double lamda = ((double)(max_iter)) / log(fun);
     double sigma = fun * exp(-1 * ((double)iter) / lamda);
+    return sigma;
+}
+double computerate(int iter, double fun)
+{
+    double sigma = fun * exp(-1 * ((double)iter) / ((double)(max_iter)) );
     return sigma;
 }
 
@@ -187,13 +195,13 @@ double computeScale(double sigma, double dist)
     return theta;
 }
 
-void updateNode(glm::fvec2** lattice, glm::fvec2 nowInput,glm::ivec2 bmuId, glm::ivec2 nodeId, double scale, double factor){
-    // std::cout << "scale : " << scale << ", factor : " << factor << ", node : "<<nodeId.x<< ", "<<nodeId.y <<" bmu : "<< bmuId.x << ", "<< bmuId.y <<std::endl;
+void updateNode(glm::fvec2** lattice, glm::fvec2 nowInput,glm::ivec2 bmuId, glm::ivec2 nodeId, double radius, double learning_rate){
+    // std::cout << "scale : " << scale << ", learning_rate : " << learning_rate << ", node : "<<nodeId.x<< ", "<<nodeId.y <<" bmu : "<< bmuId.x << ", "<< bmuId.y <<std::endl;
     // std::cout << "lattice_node : " << lattice[nodeId.x][nodeId.y].x << ", " << lattice[nodeId.x][nodeId.y].y<< std::endl;
     // std::cout << "lattic_bmu" <<lattice[bmuId.x][bmuId.y].x <<", " <<lattice[bmuId.x][bmuId.y].y<< std::endl;
-    lattice[nodeId.x][nodeId.y].x = lattice[nodeId.x][nodeId.y].x + scale * factor*(nowInput.x-lattice[nodeId.x][nodeId.y].x);
-    lattice[nodeId.x][nodeId.y].y = lattice[nodeId.x][nodeId.y].y + scale * factor*(nowInput.y-lattice[nodeId.x][nodeId.y].y);
-    // std::cout << "scale : " << scale << ", factor : " << factor << std::endl;
+    lattice[nodeId.x][nodeId.y].x = lattice[nodeId.x][nodeId.y].x + radius * learning_rate*(nowInput.x-lattice[nodeId.x][nodeId.y].x);
+    lattice[nodeId.x][nodeId.y].y = lattice[nodeId.x][nodeId.y].y + radius * learning_rate*(nowInput.y-lattice[nodeId.x][nodeId.y].y);
+    // std::cout << "scale : " << scale << ", learning_rate : " << learning_rate << std::endl;
     // std::cout << "node : " << nodeId.x << ", " << nodeId.y << std::endl;
     // std::cout << "bmu : " << bmuId.x << ", " << bmuId.y << std::endl;
     // std::cout << "bmulattice : " << lattice[bmuId.x][bmuId.y].x << ", " << lattice[bmuId.x][bmuId.y].y << std::endl;

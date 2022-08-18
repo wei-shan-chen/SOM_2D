@@ -14,4 +14,6 @@ extern const int map_height;
 extern int go;
 extern bool tmp;
 extern int iter;
+extern double n_learning_rate;
+extern double neighbor;
 #endif

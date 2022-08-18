@@ -4,9 +4,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/glm.hpp>
-#include <GL/freeglut.h>
-#include <GL/glut.h>
-#include <GL/glu.h>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -91,14 +88,15 @@ int main(){
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::Begin("SOM");
-
+        ImGui::Text("iter : %d",iter);
+        ImGui::Text("radius, %f", neighbor);
+        ImGui::Text("learning_rate, %f", n_learning_rate);
         if(ImGui::Button("Start")) {
             go = 1;
         }
         if(ImGui::Button("Stop")) {
             tmp = !tmp;
         }
-        ImGui::Text("iter : %d",iter);
 
         ImGui::End();
         processInput(window);

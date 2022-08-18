@@ -4,7 +4,6 @@ project("SOM")
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
-find_package(GLUT REQUIRED)
 add_subdirectory(ext/glm)
 
 add_executable(SOM)
@@ -35,7 +34,6 @@ target_link_libraries(SOM PRIVATE
     glm::glm # add_subdirectory(ext/glm)
     glfw  # find_package(glfw3 REQUIRED)
     OpenGL::GL # find_package(OpenGL REQUIRED)
-    GLUT::GLUT
 )
 
 add_custom_command(TARGET SOM POST_BUILD
