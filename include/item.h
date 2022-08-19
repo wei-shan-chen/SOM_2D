@@ -48,19 +48,13 @@ public:
     }
 
     void renewVBO(const std::vector<Vertex>& vertices){
-        std::cout << "Before Del VBO: " << VBO << std::endl;
-        // glDeleteBuffers(1, &VBO);
-        std::cout << "After Del VBO: " << VBO << std::endl;
-
+        glDeleteBuffers(1, &VBO);
 
         glBindVertexArray(VAO);
-        // glGenBuffers(1, &VBO);
+        glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
-        
-        // glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        // std::cout << glGetError() << std::endl;
-        // std::cout << "sw" << std::endl;
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, position));
         // glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(Vertex), vertices.data());
     }
 

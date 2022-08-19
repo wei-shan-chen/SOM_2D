@@ -59,18 +59,18 @@ int main(){
         std::cout<< "fialed to initialize GLAD" << std::endl;
         return -1;
     }
-    glDebugMessageCallback([](GLenum source,
-            GLenum type,
-            GLuint id,
-            GLenum severity,
-            GLsizei length,
-            const GLchar *message,
-            const void *userParam){
-                std::cout << type << ", " << id << ", " << message << std::endl;
-            }, nullptr); 
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    // glDebugMessageCallback([](GLenum source,
+    //         GLenum type,
+    //         GLuint id,
+    //         GLenum severity,
+    //         GLsizei length,
+    //         const GLchar *message,
+    //         const void *userParam){
+    //             std::cout << type << ", " << id << ", " << message << std::endl;
+    //         }, nullptr); 
+    // glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+    // glEnable(GL_DEBUG_OUTPUT);
+    // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
     
