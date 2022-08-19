@@ -1,4 +1,6 @@
 #include <glad/glad.h>
+
+
 #include <GLFW/glfw3.h>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -8,6 +10,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+
 
 #include "matrixStack.h"
 #include "shader.h"
@@ -34,7 +37,7 @@ using namespace std;
 
 int main(){
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -42,7 +45,7 @@ int main(){
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
     
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "SOM", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "SOM_2D", NULL, NULL);
     if(window == NULL){
         std::cout << "failed to crerate GLFW window" << std::endl;
         glfwTerminate();
@@ -56,6 +59,18 @@ int main(){
         std::cout<< "fialed to initialize GLAD" << std::endl;
         return -1;
     }
+    glDebugMessageCallback([](GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity,
+            GLsizei length,
+            const GLchar *message,
+            const void *userParam){
+                std::cout << type << ", " << id << ", " << message << std::endl;
+            }, nullptr); 
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
     
@@ -75,19 +90,21 @@ int main(){
     srand( time(NULL) );
     Shader ourShader("shader/vShader.vs", "shader/fShader.fs");
 
+    SOM_Create();
     create_world();
     Item square(world.square,world.squ_indices);
     Item line(world.line,world.squ_indices);
-
+    Item dataset_square(world.dataset_square);
+    Item lattice_square_four_edges(world.lattice_square_four_edges);
+    Item dataset_square_four_edges(world.dataset_square_four_edges);
     glEnable(GL_DEPTH_TEST);
 
-    SOM_Create();
     while (!glfwWindowShouldClose(window))
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::Begin("SOM");
+        ImGui::Begin("SOM_2D");
         ImGui::Text("iter : %d",iter);
         ImGui::Text("radius, %f", neighbor);
         ImGui::Text("learning_rate, %f", n_learning_rate);
@@ -108,98 +125,37 @@ int main(){
 
 		MatrixStack model;
         // MatrixStack view;
-        // view.Save(glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-        // ourShader.setMat4("view", view.Top());
         if(!is_som_finished && go == 1 && tmp == true) {
             SOM_IterateOnce();
         }
         // lattice
-        for(int i = 0; i < map_width; i++){
-            for(int j = 0; j < map_height; j++){ 
-                //draw input data point
-                model.Push();
-                model.Save(glm::translate(model.Top(), glm::vec3(lattice[i][j].x,lattice[i][j].y,0.0f)));
-                model.Save(glm::scale(model.Top(),glm::vec3(0.01, 0.01, 1.0f)));
-                ourShader.setMat4("model", model.Top());
-                ourShader.setVec3("color", glm::vec3(0.0,1.0,0.0));
-                glBindVertexArray(square.VAO);
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                model.Pop();
-                //draw input data line
-                // ----
-                if(i+1 < map_width){
-                    float dist = sqrt(pow(lattice[i][j].x - lattice[i+1][j].x,2) + pow(lattice[i][j].y - lattice[i+1][j].y,2));
-                    model.Push();
-                    model.Save(glm::translate(model.Top(), glm::vec3(lattice[i][j].x,lattice[i][j].y,0.0f)));
-                    model.Save(glm::rotate(model.Top(), atan2((lattice[i+1][j].y - lattice[i][j].y),(lattice[i+1][j].x - lattice[i][j].x)),glm::vec3(0.0f, 0.0f, 1.0f)));
-                    model.Save(glm::scale(model.Top(),glm::vec3((dist/0.1), 1.0f, 1.0f)));
-                    ourShader.setMat4("model", model.Top());
-                    ourShader.setVec3("color", glm::vec3(1.0,1.0,1.0));
-                    glBindVertexArray(line.VAO);
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                    model.Pop();
-                }
-                // |||
-                if(j+1 < map_height){
-                    float dist = sqrt(pow(lattice[i][j].x - lattice[i][j+1].x,2) + pow(lattice[i][j].y - lattice[i][j+1].y,2));
-                    model.Push();
-                    model.Save(glm::translate(model.Top(), glm::vec3(lattice[i][j].x,lattice[i][j].y,0.0f)));
-                    model.Save(glm::rotate(model.Top(), atan2(lattice[i][j+1].y - lattice[i][j].y ,lattice[i][j+1].x - lattice[i][j].x),glm::vec3(0.0f, 0.0f, 1.0f)));
-                    model.Save(glm::scale(model.Top(),glm::vec3((dist/0.1), 0.1, 1.0f)));
-                    ourShader.setMat4("model", model.Top());
-                    ourShader.setVec3("color", glm::vec3(1.0,0.0,1.0));
-                    glBindVertexArray(line.VAO);
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                    model.Pop();
-                }
-                
-            }
-        }
-        
+        model.Push();
+        model.Save(glm::translate(model.Top(), glm::vec3(0.0,0.0,0.0f)));
+        model.Save(glm::scale(model.Top(),glm::vec3(1.0f, 1.0f, 1.0f)));
+        ourShader.setMat4("model", model.Top());
+        ourShader.setVec3("color", glm::vec3(1.0,0.0,0.0));
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+        glBindVertexArray(lattice_square_four_edges.VAO);
+        glDrawArrays(GL_LINES, 0, world.lattice_square_four_edges.size());
+        model.Pop();
+        renew_world();
+        lattice_square_four_edges.renewVBO(world.lattice_square_four_edges);
 
-
-        
         // input data
-        for(int i = 0; i < map_width; i++){
-            for(int j = 0; j < map_height; j++){ 
-                //draw input data point
-                model.Push();
-                model.Save(glm::translate(model.Top(), glm::vec3(dataset[i][j].x,dataset[i][j].y,0.0f)));
-                model.Save(glm::scale(model.Top(),glm::vec3(0.01, 0.01, 1.0f)));
-                ourShader.setMat4("model", model.Top());
-                ourShader.setVec3("color", glm::vec3(1.0,0.0,0.0));
-                glBindVertexArray(square.VAO);
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                model.Pop();
-                //draw input data line
-                // ----
-                if(i+1 < map_width){
-                    model.Push();
-                    model.Save(glm::translate(model.Top(), glm::vec3(dataset[i][j].x,dataset[i][j].y+(0.1*0.05),0.0f)));
-                    // model.Save(glm::scale(model.Top(),glm::vec3(0.1, 0.1, 1.0f)));
-                    ourShader.setMat4("model", model.Top());
-                    ourShader.setVec3("color", glm::vec3(0.5,0.0,0.0));
-                    glBindVertexArray(line.VAO);
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                    model.Pop();
-                }
-                //|||
-                if(j+1 < map_height){
-                    model.Push();
-                    model.Save(glm::translate(model.Top(), glm::vec3(dataset[i][j].x+(0.1*0.05),dataset[i][j].y,0.0f)));
-                    model.Save(glm::rotate(model.Top(), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-                    // model.Save(glm::scale(model.Top(),glm::vec3(0.1, 0.1, 1.0f)));
-                    ourShader.setMat4("model", model.Top());
-                    ourShader.setVec3("color", glm::vec3(0.5,0.0,0.0));
-                    glBindVertexArray(line.VAO);
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-                    model.Pop();
-                }
-                
-            }
-        }
+        model.Push();
+        model.Save(glm::translate(model.Top(), glm::vec3(-0.5,-0.5,0.0f)));
+        model.Save(glm::scale(model.Top(),glm::vec3(1.0 / static_cast<double>(map_width), 1.0 / static_cast<double>(map_height), 1.0f)));
+        ourShader.setMat4("model", model.Top());
+        ourShader.setVec3("color", glm::vec3(1.0,1.0,0.0));
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+        glBindVertexArray(dataset_square_four_edges.VAO);
+        glDrawArrays(GL_LINES, 0, world.dataset_square_four_edges.size());
+        model.Pop();
+        
+        
+       
         // std::cout<< "end"<<std::endl;
-        ImGui::ShowDemoWindow();
+        // ImGui::ShowDemoWindow();
         
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

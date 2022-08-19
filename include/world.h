@@ -3,10 +3,19 @@
 
 #include <array>
 #include <vector>
-
+#include <iostream>
+#include <algorithm>
+#include <cstdlib> 
+#include <ctime> 
 #include "Vertex.h"
+#include "SOM.h"
+
 
 struct World {
+    std::vector<Vertex> dataset_square;
+    std::vector<Vertex> lattice_square_four_edges;
+    std::vector<Vertex> dataset_square_four_edges;
+
     std::vector<Vertex> square;
     std::vector<Vertex> line;
     std::vector<unsigned int> squ_indices;
@@ -15,6 +24,7 @@ struct World {
 
 void create_world();
 void destroy_world();
+void renew_world();
 
 extern struct World world;
 

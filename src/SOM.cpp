@@ -142,8 +142,8 @@ glm::fvec2 **createMap(int map_width, int map_height)
     {
         for (int j = 0; j < map_height; j++)
         {
-            double i0 = (float)(rand() / (RAND_MAX + 1.0)) * 0.9 - 0.5;
-            double j0 = (float)(rand() / (RAND_MAX + 1.0)) * 0.9 - 0.5;
+            double i0 = (float)(rand() / (RAND_MAX + 1.0))*0.9 - 0.5;
+            double j0 = (float)(rand() / (RAND_MAX + 1.0))*0.9 - 0.5;
             // std::cout << i0 << ", " << j0<<std::endl;
             lattice[i][j] = {i0, j0};
         }
@@ -196,15 +196,7 @@ double computeScale(double sigma, double dist)
 }
 
 void updateNode(glm::fvec2** lattice, glm::fvec2 nowInput,glm::ivec2 bmuId, glm::ivec2 nodeId, double radius, double learning_rate){
-    // std::cout << "scale : " << scale << ", learning_rate : " << learning_rate << ", node : "<<nodeId.x<< ", "<<nodeId.y <<" bmu : "<< bmuId.x << ", "<< bmuId.y <<std::endl;
-    // std::cout << "lattice_node : " << lattice[nodeId.x][nodeId.y].x << ", " << lattice[nodeId.x][nodeId.y].y<< std::endl;
-    // std::cout << "lattic_bmu" <<lattice[bmuId.x][bmuId.y].x <<", " <<lattice[bmuId.x][bmuId.y].y<< std::endl;
     lattice[nodeId.x][nodeId.y].x = lattice[nodeId.x][nodeId.y].x + radius * learning_rate*(nowInput.x-lattice[nodeId.x][nodeId.y].x);
     lattice[nodeId.x][nodeId.y].y = lattice[nodeId.x][nodeId.y].y + radius * learning_rate*(nowInput.y-lattice[nodeId.x][nodeId.y].y);
-    // std::cout << "scale : " << scale << ", learning_rate : " << learning_rate << std::endl;
-    // std::cout << "node : " << nodeId.x << ", " << nodeId.y << std::endl;
-    // std::cout << "bmu : " << bmuId.x << ", " << bmuId.y << std::endl;
-    // std::cout << "bmulattice : " << lattice[bmuId.x][bmuId.y].x << ", " << lattice[bmuId.x][bmuId.y].y << std::endl;
-    // std::cout << "lattic : " << lattice[nodeId.x][nodeId.y].x << ", " << lattice[nodeId.x][nodeId.y].y << std::endl;
-
+    
 }

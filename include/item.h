@@ -12,9 +12,9 @@ public:
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
+    std::vector<unsigned int> VBO_array;
 
-    //Item(float* point,int size_p,unsigned int* indice = NULL,int size_i = 0)
-    Item(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices = {})
+    Item( std::vector<Vertex> const& vertices, const std::vector<unsigned int>& indices = {})
         :VAO(0), VBO(0), EBO(0)
     {
         glGenVertexArrays(1,&VAO);
@@ -22,7 +22,7 @@ public:
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER,VBO);
-        glBufferData(GL_ARRAY_BUFFER,vertices.size()*sizeof(Vertex),vertices.data(),GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER,vertices.size()*sizeof(Vertex),vertices.data(),GL_DYNAMIC_DRAW );
 
         if( !indices.empty() ){
             glGenBuffers(1,&EBO);
@@ -33,8 +33,6 @@ public:
         //attribute
         // position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, position));
-        // std::cout << offsetof(Vertex, position) << std::endl;
-        // std::cout << offsetof(Vertex, normal) << std::endl;
         glEnableVertexAttribArray(0);
         // normal attribute
         // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
@@ -49,6 +47,26 @@ public:
         }
     }
 
+    void renewVBO(const std::vector<Vertex>& vertices){
+        std::cout << "Before Del VBO: " << VBO << std::endl;
+        // glDeleteBuffers(1, &VBO);
+        std::cout << "After Del VBO: " << VBO << std::endl;
+
+
+        glBindVertexArray(VAO);
+        // glGenBuffers(1, &VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
+        
+        // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        // std::cout << glGetError() << std::endl;
+        // std::cout << "sw" << std::endl;
+        // glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(Vertex), vertices.data());
+    }
+
+    void createVBOArray() {
+        glGenBuffers(VBO_array.size(), VBO_array.data());
+    }
 };
 
 
