@@ -127,6 +127,8 @@ int main(){
         // MatrixStack view;
         if(!is_som_finished && go == 1 && tmp == true) {
             SOM_IterateOnce();
+            renew_world();
+            lattice_square_four_edges.renewVBO(world.lattice_square_four_edges);
         }
         // lattice
         model.Push();
@@ -138,8 +140,7 @@ int main(){
         glBindVertexArray(lattice_square_four_edges.VAO);
         glDrawArrays(GL_LINES, 0, world.lattice_square_four_edges.size());
         model.Pop();
-        renew_world();
-        lattice_square_four_edges.renewVBO(world.lattice_square_four_edges);
+        
 
         // input data
         model.Push();
