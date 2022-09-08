@@ -15,7 +15,7 @@
         glBindVertexArray(dataset_square_four_edges.VAO);
         glDrawArrays(GL_LINES, 0, world.dataset_square_four_edges.size());
     ```
-![](.image/start.png)
+![](./image/start.png)
 
 
 
@@ -28,7 +28,7 @@
 
 * 最邊邊角角無法很完美的貼合 
 
-![](.image/end.png)
+![](./image/end.png)
 
 
 
